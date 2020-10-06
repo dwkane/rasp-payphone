@@ -9,4 +9,4 @@ while True:
 	while digit is None:
 		digit = kp.get_key()
 	time.sleep(0.2)
-	piphone.pressed(digit)
+	piphone.keypad_pressed(digit)
