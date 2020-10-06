@@ -1,17 +1,12 @@
 import coin_controller as coin
 import time
-import keypad
+import keypress
+from signal import pause
 
 # coin.refund()
 # time.sleep(2)
 # coin.collect()
 
-kp = keypad.KeyPad()
 
-
-while True:
-	digit = None
-	while digit is None:
-		digit = kp.get_key()
+def pressed(digit):
 	print(digit)
-	time.sleep(0.2)
