@@ -1,8 +1,9 @@
-from hardware import collect_relay
-from hardware import refund_relay
+from hardware import *
 import time
+from signal import pause
 
-amount_inserted = 0.00
+
+coin_total = 0.00
 
 
 def collect():
@@ -17,15 +18,26 @@ def refund():
     refund_relay.off()
 
 
-def reset_amount():
-    global amount_inserted
-    amount_inserted = 0.00
+def reset_coin_total():
+    global coin_total
+    coin_total = 0.00
 
 
-def return_amount():
-    return amount_inserted
+def get_coin_total():
+    return round(coin_total, 2)
 
 
-def quarter():
-    global amount_inserted
-    amount_inserted += 0.25
+def coin_inserted(switch):
+    global coin_total
+    if switch is quarter_switch:
+        coin_total += 0.25
+    elif switch is dime_switch:
+        coin_total += 0.10
+    elif switch is nickel_switch:
+        coin_total += 0.05
+
+
+quarter_switch.when_activated = coin_inserted
+dime_switch.when_activated = coin_inserted
+nickel_switch.when_activated = coin_inserted
+

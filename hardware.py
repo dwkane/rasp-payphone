@@ -1,13 +1,17 @@
 from gpiozero import Button
+from gpiozero import DigitalInputDevice
 from gpiozero import DigitalOutputDevice
 
 refund_relay = DigitalOutputDevice(17)
 collect_relay = DigitalOutputDevice(27)
 
-nickel_switch = Button(1, bounce_time=0.2)
-dime_switch = Button(7, bounce_time=0.2)
-quarter_switch = Button(8, bounce_time=0.2)
+nickel_switch = DigitalInputDevice(1, pull_up=True, bounce_time=0.1)
+dime_switch = DigitalInputDevice(7, pull_up=True, bounce_time=0.1)
+quarter_switch = DigitalInputDevice(8, pull_up=True, bounce_time=0.1)
 
-volume_button = Button(3, bounce_time=0.2)
+volume_button = Button(3, bounce_time=0.1)
+hook_switch = DigitalInputDevice(18, pull_up=True, bounce_time=0.1)
 
-hook_switch = Button(12, bounce_time=0.2)
+
+def is_on_hook():
+    return hook_switch.is_active
