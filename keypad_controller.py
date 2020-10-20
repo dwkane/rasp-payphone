@@ -2,7 +2,7 @@ import RPi.GPIO as GPIO
 import time
 from threading import Timer
 
-DEFAULT_KEY_DELAY = 300
+DEFAULT_KEY_DELAY = 100
 DEFAULT_REPEAT_DELAY = 1.0
 DEFAULT_REPEAT_RATE = 1.0
 DEFAULT_DEBOUNCE_TIME = 10
@@ -10,7 +10,8 @@ DEFAULT_DEBOUNCE_TIME = 10
 
 class KeypadFactory:
 
-    def create_keypad(self, keypad=None, row_pins=None, col_pins=None, key_delay=DEFAULT_KEY_DELAY, repeat=False,
+    @staticmethod
+    def create_keypad(keypad=None, row_pins=None, col_pins=None, key_delay=DEFAULT_KEY_DELAY, repeat=False,
                       repeat_delay=None, repeat_rate=None, gpio_mode=GPIO.BCM):
 
         if keypad is None:
@@ -33,7 +34,8 @@ class KeypadFactory:
 class Keypad:
     def __init__(self, keypad, row_pins, col_pins, key_delay=DEFAULT_KEY_DELAY, repeat=False, repeat_delay=None,
                  repeat_rate=None, gpio_mode=GPIO.BCM):
-        self._handlers = []
+        self._press_handlers = []
+        self._release_handlers = []
 
         self._keypad = keypad
         self._row_pins = row_pins
@@ -63,26 +65,40 @@ class Keypad:
         self._setColumnsAsOutput()
 
     def registerKeyPressHandler(self, handler):
-        self._handlers.append(handler)
+        self._press_handlers.append(handler)
 
     def unregisterKeyPressHandler(self, handler):
-        self._handlers.remove(handler)
+        self._press_handlers.remove(handler)
 
     def clearKeyPressHandlers(self):
-        self._handlers = []
+        self._press_handlers = []
+
+    def registerKeyReleaseHandler(self, handler):
+        self._release_handlers.append(handler)
+
+    def unregisterKeyReleaseHandler(self, handler):
+        self._release_handlers.remove(handler)
+
+    def clearKeyReleaseHandlers(self):
+        self._release_handlers = []
 
     def _repeatTimer(self):
         self._repeat_timer = None
         self._onKeyPress(None)
 
-    def _onKeyPress(self, channel):
+    def _onKeyPress(self, pin):
+        if GPIO.input(pin):
+            for handler in self._release_handlers:
+                handler()
+            return
+
         currTime = self.getTimeInMillis()
         if currTime < self._last_key_press_time + self._key_delay:
             return
 
         keyPressed = self.getKey()
         if keyPressed is not None:
-            for handler in self._handlers:
+            for handler in self._press_handlers:
                 handler(keyPressed)
             self._last_key_press_time = currTime
             if self._repeat:
@@ -100,7 +116,7 @@ class Keypad:
         # Set all rows as input
         for index in range(len(self._row_pins)):
             GPIO.setup(self._row_pins[index], GPIO.IN, pull_up_down=GPIO.PUD_UP)
-            GPIO.add_event_detect(self._row_pins[index], GPIO.FALLING, callback=self._onKeyPress,
+            GPIO.add_event_detect(self._row_pins[index], GPIO.BOTH, callback=self._onKeyPress,
                                   bouncetime=DEFAULT_DEBOUNCE_TIME)
 
     def _setColumnsAsOutput(self):
@@ -142,28 +158,8 @@ class Keypad:
         if self._repeat_timer is not None:
             self._repeat_timer.cancel()
         GPIO.cleanup()
+        print("Bye")
 
-    def getTimeInMillis(self):
+    @staticmethod
+    def getTimeInMillis():
         return time.time() * 1000
-
-
-if __name__ == "__main__":
-
-    KEYPAD = [
-        ["F1", "F2", "#", "*"],
-        [1, 2, 3, "Up"],
-        [4, 5, 6, "Down"],
-        [7, 8, 9, "Esc"],
-        ["Left", 0, "Right", "Ent"]
-        ]
-    ROW_PINS = [4, 17, 18, 27, 22]
-    COL_PINS = [9, 10, 24, 23]
-    kp = KeypadFactory().create_keypad(keypad=KEYPAD, row_pins=ROW_PINS, col_pins=COL_PINS, repeat=True,
-                                       repeat_rate=5, key_delay=100)
-
-
-    def print_key(key):
-        print(key)
-    kp.registerKeyPressHandler(print_key)
-    i = input('')
-    kp.cleanup()

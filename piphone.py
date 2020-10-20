@@ -5,25 +5,28 @@ import keypad_controller
 import tone_generator
 
 pressed_key_string = ""
-keypad = keypad_controller.Keypad
 
 
 def keypad_init():
-    global keypad
-    # factory = keypad_controller.KeypadFactory()
-    keypad = keypad_controller.KeypadFactory().create_keypad()
-    keypad.registerKeyPressHandler(keypad_pressed)
+    k_pad = keypad_controller.KeypadFactory().create_keypad()
+    k_pad.registerKeyPressHandler(keypad_pressed)
+    k_pad.registerKeyReleaseHandler(keypad_released)
+    return k_pad
 
 
 def keypad_pressed(digit):
-    # global pressed_key_string
-    # pressed_key_string = str(digit)
-    print(digit)
+    global pressed_key_string
     if is_off_hook() is True:
+        pressed_key_string = pressed_key_string + str(digit)
         tone_generator.stop_tone()
         tone_generator.play_digit(digit)
-        time.sleep(0.2)
-        tone_generator.stop_tone()
+
+
+def keypad_released():
+    global pressed_key_string
+    tone_generator.stop_tone()
+    if len(pressed_key_string) >= 11:
+        print(pressed_key_string)
 
 
 def off_hook():
@@ -31,6 +34,8 @@ def off_hook():
 
 
 def on_hook():
+    global pressed_key_string
+    pressed_key_string = ""
     tone_generator.stop_tone()
 
 
@@ -38,6 +43,9 @@ hook_switch.when_activated = off_hook
 hook_switch.when_deactivated = on_hook
 
 
-keypad_init()
-while True:
-    time.sleep(1)
+keypad = keypad_init()
+try:
+    while True:
+        time.sleep(1)
+except KeyboardInterrupt:
+    print("Bye")
