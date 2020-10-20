@@ -1,28 +1,17 @@
 import coin_controller as coin
 from hardware import *
 import time
-from pad4pi import rpi_gpio
+import keypad_controller
 import tone_generator
 
 pressed_key_string = ""
-keypad = rpi_gpio.Keypad
+keypad = keypad_controller.Keypad
 
 
 def keypad_init():
     global keypad
-    KEYPAD = [
-        [1, 2, 3],
-        [4, 5, 6],
-        [7, 8, 9],
-        ["*", 0, "#"]
-    ]
-
-    ROW_PINS = [21, 20, 16, 12]  # BCM numbering
-    COL_PINS = [25, 24, 23]  # BCM numbering
-
-    factory = rpi_gpio.KeypadFactory()
-    keypad = factory.create_keypad(keypad=KEYPAD, row_pins=ROW_PINS, col_pins=COL_PINS)
-    # printKey will be called each time a keypad button is pressed
+    # factory = keypad_controller.KeypadFactory()
+    keypad = keypad_controller.KeypadFactory().create_keypad()
     keypad.registerKeyPressHandler(keypad_pressed)
 
 
