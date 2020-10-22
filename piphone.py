@@ -3,8 +3,17 @@ from hardware import *
 import time
 import keypad_controller
 import tone_generator
+from linphone222 import Wrapper
 
 pressed_key_string = ""
+
+
+SipClient = Wrapper.Wrapper()
+SipClient.StartLinphone()
+# SipClient.SipRegister(username="281329", password="24KeeJGK3cVWkw#", hostname="seattle2.voip.ms")
+# SipClient.RegisterCallbacks(OnIncomingCall=OnIncomingCall, OnOutgoingCall=OnOutgoingCall,
+# OnRemoteHungupCall=OnRemoteHungupCall, OnSelfHungupCall=OnSelfHungupCall)
+SipClient.start()
 
 
 def keypad_init():
@@ -26,24 +35,30 @@ def keypad_released():
     global pressed_key_string
     tone_generator.stop_tone()
     if len(pressed_key_string) >= 11:
-        print(pressed_key_string)
+        print("Dialing: " + pressed_key_string)
+        SipClient.SipCall(pressed_key_string)
+        pressed_key_string = ""
 
 
 def off_hook():
-    tone_generator.play_dial_tone()
+    print("Off Hook...")
+    # tone_generator.play_dial_tone()
+    SipClient.SipCall("18002553700")
 
 
 def on_hook():
     global pressed_key_string
     pressed_key_string = ""
     tone_generator.stop_tone()
+    if SipClient is not None:
+        print("Hanging Up...")
+        SipClient.SipHangup()
 
 
 hook_switch.when_activated = off_hook
 hook_switch.when_deactivated = on_hook
-
-
 keypad = keypad_init()
+
 try:
     while True:
         time.sleep(1)
