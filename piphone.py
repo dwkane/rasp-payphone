@@ -1,12 +1,12 @@
-import coin_controller as coin
 from hardware import *
 import time
 import keypad_controller
 import tone_generator
-from linphone import Wrapper
+from modules.linphone import Wrapper
+import modules.google.tts.tts as tts
 
 pressed_key_string = ""
-
+tts = tts.TTS()
 
 SipClient = Wrapper.Wrapper()
 SipClient.StartLinphone()
@@ -36,8 +36,10 @@ def keypad_released():
     tone_generator.stop_tone()
     if len(pressed_key_string) >= 11:
         print("Dialing: " + pressed_key_string)
-        SipClient.SipCall(pressed_key_string)
+        # SipClient.SipCall(pressed_key_string)
         pressed_key_string = ""
+        tone_generator.play_error_tone()
+        tts.say("If you would like to make a call, please deposit twenty five cents.")
 
 
 def off_hook():

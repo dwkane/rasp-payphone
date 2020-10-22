@@ -1,6 +1,7 @@
 import pygame
 import pygame.sndarray
 import numpy
+import time
 
 
 def play_for(sample_wave):
@@ -12,6 +13,11 @@ def play_for(sample_wave):
 sample_rate = 44100
 pygame.mixer.pre_init(sample_rate, -16, 1)
 pygame.init()
+
+
+def play_file(file):
+    pygame.mixer.music.load(file)
+    pygame.mixer.music.play()
 
 
 def sine_wave(hz, peak, n_samples=sample_rate):
@@ -62,3 +68,16 @@ def play_digit(digit):
 
 def play_dial_tone():
     play_for(sum([sine_wave(350, 4096), sine_wave(440, 4096)]))
+
+
+def play_error_tone():
+    stop_tone()
+    play_for(sine_wave(913.8, 2048))
+    time.sleep(.276)
+    stop_tone()
+    play_for(sine_wave(1370.6, 2048))
+    time.sleep(.276)
+    stop_tone()
+    play_for(sine_wave(1776.7, 2048))
+    time.sleep(.380)
+    stop_tone()
