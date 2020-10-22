@@ -3,7 +3,7 @@ from hardware import *
 import time
 import keypad_controller
 import tone_generator
-from linphone222 import Wrapper
+from linphone import Wrapper
 
 pressed_key_string = ""
 
