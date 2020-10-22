@@ -42,8 +42,8 @@ def keypad_released():
 
 def off_hook():
     print("Off Hook...")
-    # tone_generator.play_dial_tone()
-    SipClient.SipCall("18002553700")
+    tone_generator.play_dial_tone()
+    # SipClient.SipCall("18002553700")
 
 
 def on_hook():

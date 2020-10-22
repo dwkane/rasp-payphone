@@ -1,5 +1,5 @@
 import sys
-from pexpect import spawnu as spawn
+from pexpect import spawn
 import threading
 
 
@@ -23,10 +23,11 @@ class Wrapper(threading.Thread):
     def StartLinphone(self):
         print("StartLinPhone: isRunning = " + str(self.IsRunning()))
         if not self.IsRunning():
-            self.linphone = spawn(self.linphone_cmd, encoding='utf-8')
+            self.linphone = spawn(self.linphone_cmd, encoding='utf-8', timeout=None)
             self.linphone.logfile_read = sys.stdout
 
     def StopLinphone(self):
+        print("StopLinPhone: isRunning = " + str(self.IsRunning()))
         if self.IsRunning():
             self.linphone.terminate()
 
@@ -38,15 +39,17 @@ class Wrapper(threading.Thread):
 
     def run(self):
         while self.IsRunning():
-            pass
             # line = self.linphone.stdout.readline().rstrip()
-            # line = self.linphone.readline()
+            line = self.linphone.readline()
             # print("[LINPHONE] %s" % line)
-            # if line.find("is contacting you") != -1:
+#           if line.find("is contacting you") != -1:
+#               print("Incoming Call")
             #     self.OnIncomingCall()
-            # if line.find("Call terminated") != -1:
+#             if line.find("Call terminated") != -1:
+#                 print("Remote Hangup")
             #     self.OnRemoteHungupCall()
-            # if line.find("Call ended") != -1:
+#             if line.find("Call ended") != -1:
+#                 print("Self Hangup")
             #     self.OnSelfHungupCall()
 
     def SendCmd(self, cmd):
@@ -60,7 +63,7 @@ class Wrapper(threading.Thread):
             self.sip_username = username
             self.sip_hostname = hostname
             self.sip_password = password
-            print("registering " + username + "...")
+            print("Registering " + username + "...")
             self.SendCmd("register sip:%s@%s %s %s" % (username, hostname, hostname, password))
             # self.SendCmd("codec disable 4")
             # self.SendCmd("codec disable 5")
@@ -72,7 +75,6 @@ class Wrapper(threading.Thread):
             self.SendCmd("call %s" % number)
 
     def SipHangup(self):
-        print("SipHangup: isRunning = " + str(self.IsRunning()))
         if self.IsRunning():
             self.SendCmd("terminate")
 

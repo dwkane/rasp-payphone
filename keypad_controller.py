@@ -2,10 +2,10 @@ import RPi.GPIO as GPIO
 import time
 from threading import Timer
 
-DEFAULT_KEY_DELAY = 100
+DEFAULT_KEY_DELAY = 300
 DEFAULT_REPEAT_DELAY = 1.0
 DEFAULT_REPEAT_RATE = 1.0
-DEFAULT_DEBOUNCE_TIME = 10
+DEFAULT_DEBOUNCE_TIME = 20
 
 
 class KeypadFactory:
