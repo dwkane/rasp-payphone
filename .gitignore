@@ -130,3 +130,6 @@ dmypy.json
 
 # JetBrains .idea folder
 .idea/
+
+# Google API Authentication
+modules/google/*.json
