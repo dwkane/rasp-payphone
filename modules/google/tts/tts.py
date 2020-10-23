@@ -7,8 +7,8 @@ class TTS:
 
     def __init__(self):
         self.fileDir = os.path.dirname(os.path.realpath('__file__'))
-        self.client = texttospeech.TextToSpeechClient.from_service_account_json\
-            (os.path.join(self.fileDir, 'modules/google/google.json'))
+        self.client = texttospeech.TextToSpeechClient.from_service_account_json(
+            os.path.join(self.fileDir, 'modules/google/google.json'))
         self.voice = texttospeech.VoiceSelectionParams(language_code="en_US", name="en-US-Wavenet-G")
         self.audio_config = texttospeech.AudioConfig(audio_encoding=texttospeech.AudioEncoding.MP3)
 
