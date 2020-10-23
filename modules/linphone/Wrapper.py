@@ -21,13 +21,11 @@ class Wrapper(threading.Thread):
             return False
 
     def StartLinphone(self):
-        print("StartLinPhone: isRunning = " + str(self.IsRunning()))
         if not self.IsRunning():
             self.linphone = spawn(self.linphone_cmd, encoding='utf-8', timeout=None)
             self.linphone.logfile_read = sys.stdout
 
     def StopLinphone(self):
-        print("StopLinPhone: isRunning = " + str(self.IsRunning()))
         if self.IsRunning():
             self.linphone.terminate()
 
@@ -53,9 +51,7 @@ class Wrapper(threading.Thread):
             #     self.OnSelfHungupCall()
 
     def SendCmd(self, cmd):
-        print("SendCmd: isRunning = " + str(self.IsRunning()))
         if self.IsRunning():
-            print("Sending Command: " + cmd)
             self.linphone.sendline(cmd)
 
     def SipRegister(self, username, hostname, password):
@@ -63,15 +59,12 @@ class Wrapper(threading.Thread):
             self.sip_username = username
             self.sip_hostname = hostname
             self.sip_password = password
-            print("Registering " + username + "...")
             self.SendCmd("register sip:%s@%s %s %s" % (username, hostname, hostname, password))
             # self.SendCmd("codec disable 4")
             # self.SendCmd("codec disable 5")
 
     def SipCall(self, number):
-        print("SipCall: isRunning = " + str(self.IsRunning()))
         if self.IsRunning():
-            print("Calling: " + str(number))
             self.SendCmd("call %s" % number)
 
     def SipHangup(self):
