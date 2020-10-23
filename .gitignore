@@ -133,3 +133,6 @@ dmypy.json
 
 # Google API Authentication
 modules/google/*.json
+
+# TTS MP3 files
+modules/google/tts/*.mp3
