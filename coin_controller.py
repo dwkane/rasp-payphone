@@ -2,7 +2,7 @@ from hardware import *
 import time
 
 
-coin_total = 0.00
+coin_total = 0
 
 
 def collect():
@@ -21,11 +21,11 @@ def refund():
 
 def reset_coin_total():
     global coin_total
-    coin_total = 0.00
+    coin_total = 0
 
 
 def get_coin_total():
-    return round(coin_total, 2)
+    return coin_total / 100
 
 
 def is_enough_deposited(needed):
@@ -38,11 +38,11 @@ def is_enough_deposited(needed):
 def coin_inserted(switch):
     global coin_total
     if switch is quarter_switch:
-        coin_total += 0.25
+        coin_total += 25
     elif switch is dime_switch:
-        coin_total += 0.10
+        coin_total += 10
     elif switch is nickel_switch:
-        coin_total += 0.05
+        coin_total += 5
 
 
 quarter_switch.when_activated = coin_inserted

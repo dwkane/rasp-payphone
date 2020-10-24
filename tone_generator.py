@@ -18,6 +18,8 @@ pygame.init()
 def play_file(file):
     pygame.mixer.music.load(file)
     pygame.mixer.music.play()
+    while pygame.mixer.music.get_busy():
+        time.sleep(0.1)
 
 
 def sine_wave(hz, peak, n_samples=sample_rate):
@@ -36,6 +38,7 @@ sound = pygame.sndarray.make_sound(sine_wave(1, 1))
 
 def stop_tone():
     global sound
+    pygame.mixer.music.stop()
     sound.stop()
 
 
