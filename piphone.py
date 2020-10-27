@@ -44,8 +44,9 @@ def keypad_released():
         tone_generator.stop_tone()
         if key_timer is not None:
             key_timer.cancel()
-        new_key_timer()
-        key_timer.start()
+        if call_attempt is False:
+            new_key_timer()
+            key_timer.start()
 
 
 def make_call():
@@ -62,7 +63,7 @@ def make_call():
             if call_attempt is True:
                 tone_generator.play_error_tone()
                 tts.say("If you would like to make a call, please deposit $" +
-                        str(amount_needed - coin.get_coin_total()))
+                        str(round(amount_needed - coin.get_coin_total(), 2)))
                 time.sleep(3)
             else:
                 return

@@ -29,7 +29,7 @@ def get_coin_total():
 
 
 def is_enough_deposited(needed):
-    if needed > get_coin_total():
+    if needed > round(get_coin_total(), 2):
         return False
     else:
         return True
@@ -43,8 +43,9 @@ def coin_inserted(switch):
         coin_total += 10
     elif switch is nickel_switch:
         coin_total += 5
+    print(get_coin_total())
 
 
-quarter_switch.when_activated = coin_inserted
-dime_switch.when_activated = coin_inserted
-nickel_switch.when_activated = coin_inserted
+quarter_switch.when_pressed = coin_inserted
+dime_switch.when_pressed = coin_inserted
+nickel_switch.when_pressed = coin_inserted
