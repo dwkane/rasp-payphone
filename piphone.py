@@ -56,8 +56,8 @@ def make_call():
     call_attempt = True
     if key_timer is not None:
         key_timer.cancel()
-    tts.say("Now dialing: " + format_number(pressed_key_string))
-    time.sleep(2)
+    # tts.say("Now dialing: " + format_number(pressed_key_string))
+    # time.sleep(2)
     if is_number_valid(pressed_key_string):
         while not coin.is_enough_deposited(amount_needed):
             if call_attempt is True:
@@ -70,6 +70,8 @@ def make_call():
         pressed_key_string = format_number(pressed_key_string)
         print("Dialing: " + pressed_key_string)
         SipClient.SipCall(pressed_key_string)
+        # time.sleep(10)
+        # print("Call connected: " + str(SipClient.is_call_connected()))
         coin.reset_coin_total()
     else:
         while call_attempt is True:

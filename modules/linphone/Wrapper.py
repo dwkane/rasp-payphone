@@ -7,6 +7,8 @@ class Wrapper(threading.Thread):
     linphone = None
     linphone_cmd = ["linphonec"]
 
+    call_connected = False
+
     sip_username = None
     sip_hostname = None
     sip_password = None
@@ -40,15 +42,21 @@ class Wrapper(threading.Thread):
             # line = self.linphone.stdout.readline().rstrip()
             line = self.linphone.readline()
             # print("[LINPHONE] %s" % line)
-#           if line.find("is contacting you") != -1:
-#               print("Incoming Call")
-            #     self.OnIncomingCall()
-#             if line.find("Call terminated") != -1:
-#                 print("Remote Hangup")
-            #     self.OnRemoteHungupCall()
-#             if line.find("Call ended") != -1:
-#                 print("Self Hangup")
-            #     self.OnSelfHungupCall()
+            if line.find("is contacting you") != -1:
+                print("Incoming Call")
+                # self.OnIncomingCall()
+            if line.find("Call terminated") != -1:
+                print("Remote Hangup")
+                self.call_connected = False
+                # self.OnRemoteHungupCall()
+            if line.find("Call ended") != -1:
+                print("Self Hangup")
+                self.call_connected = False
+                # self.OnSelfHungupCall()
+            if line.find("Call answered by") != -1:
+                print("Call Active")
+                self.call_connected = True
+                # self.OnSelfHungupCall()
 
     def SendCmd(self, cmd):
         if self.IsRunning():
@@ -74,3 +82,6 @@ class Wrapper(threading.Thread):
     def SipAnswer(self):
         if self.IsRunning():
             self.SendCmd("answer")
+
+    def is_call_connected(self):
+        return self.call_connected
