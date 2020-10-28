@@ -3,6 +3,9 @@ import time
 
 
 coin_total = 0
+quarter_switch = 8
+dime_switch = 7
+nickel_switch = 1
 
 
 def collect():
@@ -44,8 +47,3 @@ def coin_inserted(switch):
     elif switch is nickel_switch:
         coin_total += 5
     print(get_coin_total())
-
-
-quarter_switch.when_pressed = coin_inserted
-dime_switch.when_pressed = coin_inserted
-nickel_switch.when_pressed = coin_inserted
