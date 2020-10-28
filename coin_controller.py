@@ -1,4 +1,4 @@
-from hardware import *
+import hardware
 import time
 
 
@@ -10,16 +10,16 @@ nickel_switch = 1
 
 def collect():
     reset_coin_total()
-    collect_relay.on()
+    hardware.collect_relay.on()
     time.sleep(0.6)
-    collect_relay.off()
+    hardware.collect_relay.off()
 
 
 def refund():
     reset_coin_total()
-    refund_relay.on()
+    hardware.refund_relay.on()
     time.sleep(0.6)
-    refund_relay.off()
+    hardware.refund_relay.off()
 
 
 def reset_coin_total():
@@ -40,6 +40,7 @@ def is_enough_deposited(needed):
 
 def coin_inserted(switch):
     global coin_total
+    # TODO: Fix phantom coin issue
     if switch is quarter_switch:
         coin_total += 25
     elif switch is dime_switch:

@@ -2,7 +2,7 @@ from hardware import *
 import time
 import keypad_controller
 import tone_generator
-from modules.linphone import Wrapper
+from modules.linphone import sip_controller
 import modules.google.tts.tts as tts
 import coin_controller as coin
 from threading import Timer
@@ -16,7 +16,7 @@ call_attempt = False
 amount_needed = 0.25
 key_timer = None
 
-SipClient = Wrapper.Wrapper()
+SipClient = sip_controller.SipController()
 SipClient.StartLinphone()
 # SipClient.SipRegister(username="281329", password="24KeeJGK3cVWkw#", hostname="seattle2.voip.ms")
 # SipClient.RegisterCallbacks(OnIncomingCall=OnIncomingCall, OnOutgoingCall=OnOutgoingCall,
@@ -58,23 +58,24 @@ def make_call():
         key_timer.cancel()
     # tts.say("Now dialing: " + format_number(pressed_key_string))
     # time.sleep(2)
+    tone_generator.stop_tone()
     if is_number_valid(pressed_key_string):
         while not coin.is_enough_deposited(amount_needed):
-            if call_attempt is True:
+            if is_off_hook():
                 tone_generator.play_error_tone()
                 tts.say("If you would like to make a call, please deposit $" +
                         str(round(amount_needed - coin.get_coin_total(), 2)))
                 time.sleep(3)
             else:
                 return
-        pressed_key_string = format_number(pressed_key_string)
-        print("Dialing: " + pressed_key_string)
-        SipClient.SipCall(pressed_key_string)
-        # time.sleep(10)
-        # print("Call connected: " + str(SipClient.is_call_connected()))
-        coin.reset_coin_total()
+        if is_off_hook():
+            pressed_key_string = format_number(pressed_key_string)
+            print("Dialing: " + pressed_key_string)
+            if SipClient.IsRunning():
+                SipClient.SipCall(pressed_key_string)
+            coin.reset_coin_total()
     else:
-        while call_attempt is True:
+        while is_off_hook():
             tone_generator.play_error_tone()
             tts.say("We're sorry.  The number you entered cannot be completed as dialed.  "
                     "Please hang up and try your call again")
@@ -88,19 +89,33 @@ def new_key_timer():
 
 def off_hook():
     print("Off Hook...")
-    tone_generator.play_dial_tone()
+    print(coin.get_coin_total())
+    if SipClient.is_call_incoming():
+        # TODO: stop ringer
+        tone_generator.stop_tone()
+        if SipClient.IsRunning():
+            SipClient.SipAnswer()
+    else:
+        tone_generator.play_dial_tone()
 
 
 def on_hook():
     global pressed_key_string
     global call_attempt
     pressed_key_string = ""
-    call_attempt = False
+    print("Hanging Up...")
     tone_generator.stop_tone()
-    coin.reset_coin_total()
-    if SipClient is not None:
-        print("Hanging Up...")
+    if SipClient.IsRunning() and call_attempt:
         SipClient.SipHangup()
+        if SipClient.collect_money:
+            coin.collect()
+            SipClient.collect_money = False
+        else:
+            coin.refund()
+        call_attempt = False
+    if coin.get_coin_total() > 0:
+        coin.refund()
+    coin.reset_coin_total()
 
 
 hook_switch.when_activated = off_hook
