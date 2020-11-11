@@ -18,7 +18,7 @@ key_timer = None
 
 SipClient = sip_controller.SipController()
 SipClient.StartLinphone()
-# SipClient.SipRegister(username="281329", password="24KeeJGK3cVWkw#", hostname="seattle2.voip.ms")
+# SipClient.SipRegister(username="281329", password="", hostname="seattle2.voip.ms")
 # SipClient.RegisterCallbacks(OnIncomingCall=OnIncomingCall, OnOutgoingCall=OnOutgoingCall,
 # OnRemoteHungupCall=OnRemoteHungupCall, OnSelfHungupCall=OnSelfHungupCall)
 SipClient.start()
