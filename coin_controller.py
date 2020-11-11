@@ -3,9 +3,6 @@ import time
 
 
 coin_total = 0
-quarter_switch = 8
-dime_switch = 7
-nickel_switch = 1
 
 
 def collect():
@@ -40,11 +37,15 @@ def is_enough_deposited(needed):
 
 def coin_inserted(switch):
     global coin_total
-    # TODO: Fix phantom coin issue
-    if switch is quarter_switch:
+    if switch is hardware.quarter_switch:
         coin_total += 25
-    elif switch is dime_switch:
+    elif switch is hardware.dime_switch:
         coin_total += 10
-    elif switch is nickel_switch:
+    elif switch is hardware.nickel_switch:
         coin_total += 5
     print(get_coin_total())
+
+
+hardware.dime_switch.when_pressed = coin_inserted
+hardware.nickel_switch.when_pressed = coin_inserted
+hardware.quarter_switch.when_pressed = coin_inserted
