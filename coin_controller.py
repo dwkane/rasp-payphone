@@ -1,7 +1,6 @@
 import hardware
 import time
 
-
 coin_total = 0
 
 
@@ -37,15 +36,22 @@ def is_enough_deposited(needed):
 
 def coin_inserted(switch):
     global coin_total
-    if switch is hardware.quarter_switch:
+    time.sleep(0.01)
+    # if switch activation is a false positive due to interference when a relay activates
+    if bool(hardware.GPIO.input(switch)) is True:
+        return
+    if switch is hardware.quarter_pin:
         coin_total += 25
-    elif switch is hardware.dime_switch:
+    elif switch is hardware.dime_pin:
         coin_total += 10
-    elif switch is hardware.nickel_switch:
+    elif switch is hardware.nickel_pin:
         coin_total += 5
     print(get_coin_total())
 
 
-hardware.dime_switch.when_pressed = coin_inserted
-hardware.nickel_switch.when_pressed = coin_inserted
-hardware.quarter_switch.when_pressed = coin_inserted
+def vol_button_pressed(switch):
+    time.sleep(0.01)
+    # if switch activation is a false positive due to interference when a relay activates
+    if bool(switch.value) is False:
+        return
+    print("volume")
