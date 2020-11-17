@@ -91,13 +91,17 @@ def new_key_timer():
 def off_hook():
     print("Off Hook...")
     print(coin.get_coin_total())
-    if SipClient.is_call_incoming():
-        hardware.ringer_relay.off()
-        tone_generator.stop_tone()
-        if SipClient.IsRunning():
+    if SipClient.IsRunning():
+        if SipClient.is_call_incoming():
+            hardware.ringer_relay.off()
+            tone_generator.stop_tone()
             SipClient.SipAnswer()
+        else:
+            tone_generator.play_dial_tone()
     else:
-        tone_generator.play_dial_tone()
+        tone_generator.play_error_tone()
+        tts.say("Error.  The SIP Client is not running.")
+        time.sleep(3)
 
 
 def on_hook():
@@ -134,6 +138,7 @@ keypad = keypad_init()
 try:
     while True:
         time.sleep(1)
+        # SipClient.SendCmd("soundcard show")
         # hardware.ringer_relay.on()
         # time.sleep(2)
         # hardware.ringer_relay.off()

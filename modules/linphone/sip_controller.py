@@ -3,11 +3,13 @@ from pexpect import spawn
 import threading
 import time
 import hardware
+import tone_generator
 
 
 class SipController(threading.Thread):
     linphone = None
-    linphone_cmd = ["linphonec"]
+    linphone_cmd = 'linphonec'
+    linphone_cmd_args = []  # ['-c', '~/.linphonerc']
 
     call_connected = False
     incoming_call = False
@@ -28,7 +30,7 @@ class SipController(threading.Thread):
 
     def StartLinphone(self):
         if not self.IsRunning():
-            self.linphone = spawn(self.linphone_cmd, encoding='utf-8', timeout=None)
+            self.linphone = spawn(self.linphone_cmd, args=self.linphone_cmd_args, encoding='utf-8', timeout=None)
             self.linphone.logfile_read = sys.stdout
 
     def StopLinphone(self):
@@ -46,35 +48,28 @@ class SipController(threading.Thread):
             # line = self.linphone.stdout.readline().rstrip()
             line = self.linphone.readline()
             # print("[LINPHONE] %s" % line)
-            if line.find("Receiving new incoming call") != -1:
+            if "Receiving new incoming call" in line:
                 print("Incoming Call")
                 self.incoming_call = True
                 self.OnIncomingCall()
-            if line.find("Call terminated") != -1:
-                print("Remote Hangup")
+            if "Call" in line and "ended" in line:
+                print("Hangup")
                 self.call_connected = False
                 self.incoming_call = False
-                # self.OnRemoteHungupCall()
-            if line.find("Call ended") != -1:
-                print("Self Hangup")
-                self.call_connected = False
-                self.incoming_call = False
-                # self.OnSelfHungupCall()
-            if line.find("Call answered by") != -1:
+                self.SipHangup()
+            if "Call" in line and "connected" in line:
                 print("Call Active")
                 self.call_connected = True
                 self.incoming_call = False
                 time.sleep(5)
                 self.collect_money = True
-                # self.OnSelfHungupCall()
 
     def OnIncomingCall(self):
-        pass
-        # while self.incoming_call and not hardware.is_off_hook():
-            # hardware.ringer_relay.on()
-            # time.sleep(2)
-            # hardware.ringer_relay.off()
-            # time.sleep(4)
+        while self.incoming_call and not hardware.is_off_hook():
+            hardware.ringer_relay.on()
+            time.sleep(2)
+            hardware.ringer_relay.off()
+            time.sleep(4)
 
     def SendCmd(self, cmd):
         if self.IsRunning():
@@ -96,6 +91,9 @@ class SipController(threading.Thread):
     def SipHangup(self):
         if self.IsRunning():
             self.SendCmd("terminate")
+            if hardware.is_off_hook():
+                time.sleep(2)
+                tone_generator.play_dial_tone()
 
     def SipAnswer(self):
         if self.IsRunning():
