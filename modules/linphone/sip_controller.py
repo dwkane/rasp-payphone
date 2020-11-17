@@ -2,6 +2,7 @@ import sys
 from pexpect import spawn
 import threading
 import time
+import hardware
 
 
 class SipController(threading.Thread):
@@ -45,11 +46,10 @@ class SipController(threading.Thread):
             # line = self.linphone.stdout.readline().rstrip()
             line = self.linphone.readline()
             # print("[LINPHONE] %s" % line)
-            if line.find("is contacting you") != -1:
+            if line.find("Receiving new incoming call") != -1:
                 print("Incoming Call")
                 self.incoming_call = True
-                # TODO: Start Ringer
-                # self.OnIncomingCall()
+                self.OnIncomingCall()
             if line.find("Call terminated") != -1:
                 print("Remote Hangup")
                 self.call_connected = False
@@ -67,6 +67,14 @@ class SipController(threading.Thread):
                 time.sleep(5)
                 self.collect_money = True
                 # self.OnSelfHungupCall()
+
+    def OnIncomingCall(self):
+        pass
+        # while self.incoming_call and not hardware.is_off_hook():
+            # hardware.ringer_relay.on()
+            # time.sleep(2)
+            # hardware.ringer_relay.off()
+            # time.sleep(4)
 
     def SendCmd(self, cmd):
         if self.IsRunning():
@@ -91,7 +99,7 @@ class SipController(threading.Thread):
 
     def SipAnswer(self):
         if self.IsRunning():
-            # TODO: Stop Ringer
+            self.incoming_call = False
             self.SendCmd("answer")
 
     def is_call_connected(self):

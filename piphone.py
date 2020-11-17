@@ -1,4 +1,4 @@
-from hardware import *
+import hardware
 import time
 import keypad_controller
 import tone_generator
@@ -33,14 +33,15 @@ def keypad_init():
 
 def keypad_pressed(digit):
     global pressed_key_string
-    if is_off_hook() is True:
+    if hardware.is_off_hook() is True:
         pressed_key_string = pressed_key_string + str(digit)
         tone_generator.stop_tone()
         tone_generator.play_digit(digit)
+        # TODO: Add DMTF while call is connected
 
 
 def keypad_released():
-    if is_off_hook() is True:
+    if hardware.is_off_hook() is True:
         tone_generator.stop_tone()
         if key_timer is not None:
             key_timer.cancel()
@@ -61,24 +62,24 @@ def make_call():
     tone_generator.stop_tone()
     if is_number_valid(pressed_key_string):
         while not coin.is_enough_deposited(amount_needed):
-            if is_off_hook():
+            if hardware.is_off_hook():
                 tone_generator.play_error_tone()
                 tts.say("If you would like to make a call, please deposit $" +
                         str(round(amount_needed - coin.get_coin_total(), 2)))
                 time.sleep(3)
             else:
                 return
-        if is_off_hook():
+        if hardware.is_off_hook():
             pressed_key_string = format_number(pressed_key_string)
             print("Dialing: " + pressed_key_string)
             if SipClient.IsRunning():
                 SipClient.SipCall(pressed_key_string)
             coin.reset_coin_total()
     else:
-        while is_off_hook():
+        while hardware.is_off_hook():
             tone_generator.play_error_tone()
             tts.say("We're sorry.  The number you entered cannot be completed as dialed.  "
-                    "Please hang up and try your call again")
+                    "Please hang up and try your call again.")
             time.sleep(3)
 
 
@@ -91,7 +92,7 @@ def off_hook():
     print("Off Hook...")
     print(coin.get_coin_total())
     if SipClient.is_call_incoming():
-        # TODO: stop ringer
+        hardware.ringer_relay.off()
         tone_generator.stop_tone()
         if SipClient.IsRunning():
             SipClient.SipAnswer()
@@ -105,26 +106,37 @@ def on_hook():
     pressed_key_string = ""
     print("Hanging Up...")
     tone_generator.stop_tone()
-    if SipClient.IsRunning() and call_attempt:
-        SipClient.SipHangup()
-        if SipClient.collect_money:
-            coin.collect()
-            SipClient.collect_money = False
-        else:
+    if SipClient.IsRunning():
+        if call_attempt:  # Outgoing Call
+            SipClient.SipHangup()
+            if SipClient.collect_money:
+                coin.collect()
+                SipClient.collect_money = False
+            else:
+                coin.refund()
+            call_attempt = False
+            if coin.get_coin_total() > 0:
+                coin.refund()
+            coin.reset_coin_total()
+        elif SipClient.is_call_connected():  # Incoming Call
+            SipClient.SipHangup()
+    else:
+        if coin.get_coin_total() > 0:
             coin.refund()
-        call_attempt = False
-    if coin.get_coin_total() > 0:
-        coin.refund()
-    coin.reset_coin_total()
+        coin.reset_coin_total()
 
 
-hook_switch.when_activated = off_hook
-hook_switch.when_deactivated = on_hook
+hardware.hook_switch.when_activated = off_hook
+hardware.hook_switch.when_deactivated = on_hook
 keypad = keypad_init()
 
 
 try:
     while True:
         time.sleep(1)
+        # hardware.ringer_relay.on()
+        # time.sleep(2)
+        # hardware.ringer_relay.off()
+        # time.sleep(4)
 except KeyboardInterrupt:
     print("Bye")
