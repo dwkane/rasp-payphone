@@ -65,15 +65,16 @@ class SipController(threading.Thread):
                 self.collect_money = True
 
     def OnIncomingCall(self):
-        while self.incoming_call and not hardware.is_off_hook():
-            hardware.ringer_relay.on()
-            time.sleep(2)
-            hardware.ringer_relay.off()
-            time.sleep(4)
+        if self.IsRunning():
+            while self.incoming_call and not hardware.is_off_hook():
+                hardware.ringer_relay.on()
+                time.sleep(2)
+                hardware.ringer_relay.off()
+                time.sleep(4)
 
     def SendCmd(self, cmd):
         if self.IsRunning():
-            self.linphone.sendline(cmd)
+            self.linphone.sendline(str(cmd))
 
     def SipRegister(self, username, hostname, password):
         if self.IsRunning():
@@ -90,7 +91,8 @@ class SipController(threading.Thread):
 
     def SipHangup(self):
         if self.IsRunning():
-            self.SendCmd("terminate")
+            if self.is_call_connected():
+                self.SendCmd("terminate")
             if hardware.is_off_hook():
                 time.sleep(2)
                 tone_generator.play_dial_tone()
