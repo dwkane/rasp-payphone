@@ -120,8 +120,22 @@ def on_hook():
         SipClient.SipHangup()
 
 
+def vol_button_pressed(switch):
+    time.sleep(0.01)
+    # if switch activation is a false positive due to interference when a relay activates
+    if bool(switch.value) is False:
+        return
+    if SipClient.current_volume is 45:
+        SipClient.SetVolume(60)
+    elif SipClient.current_volume is 60:
+        SipClient.SetVolume(30)
+    elif SipClient.current_volume is 30:
+        SipClient.SetVolume(45)
+
+
 hardware.hook_switch.when_activated = off_hook
 hardware.hook_switch.when_deactivated = on_hook
+hardware.volume_button.when_activated = vol_button_pressed
 keypad = keypad_init()
 
 

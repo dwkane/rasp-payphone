@@ -1,5 +1,7 @@
 import sys
 from pexpect import spawn
+from pexpect import run
+import re
 import threading
 import time
 import hardware
@@ -14,6 +16,8 @@ class SipController(threading.Thread):
     call_connected = False
     incoming_call = False
     collect_money = False
+    default_volume = 45
+    current_volume = 0
 
     sip_username = None
     sip_hostname = None
@@ -32,6 +36,7 @@ class SipController(threading.Thread):
         if not self.IsRunning():
             self.linphone = spawn(self.linphone_cmd, args=self.linphone_cmd_args, encoding='utf-8', timeout=None)
             self.linphone.logfile_read = sys.stdout
+        self.SetVolume(self.default_volume)
 
     def StopLinphone(self):
         if self.IsRunning():
@@ -45,7 +50,6 @@ class SipController(threading.Thread):
 
     def run(self):
         while self.IsRunning():
-            # line = self.linphone.stdout.readline().rstrip()
             line = self.linphone.readline()
             # print("[LINPHONE] %s" % line)
             if "Receiving new incoming call" in line:
@@ -101,6 +105,11 @@ class SipController(threading.Thread):
         if self.IsRunning():
             self.incoming_call = False
             self.SendCmd("answer")
+
+    def SetVolume(self, vol):
+        run("amixer set Master " + str(vol) + "%")
+        results = re.search('\d*%', str(run("amixer sget Master")))
+        self.current_volume = int(results.group(0).replace("%", ""))
 
     def is_call_connected(self):
         return self.call_connected

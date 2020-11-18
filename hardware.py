@@ -2,7 +2,6 @@ from gpiozero import DigitalInputDevice
 from gpiozero import DigitalOutputDevice
 import RPi.GPIO as GPIO
 from coin_controller import coin_inserted
-from coin_controller import vol_button_pressed
 
 # Pin Numbers
 refund_relay_pin = 17
@@ -18,7 +17,6 @@ refund_relay = DigitalOutputDevice(pin=refund_relay_pin)
 collect_relay = DigitalOutputDevice(pin=collect_relay_pin)
 ringer_relay = DigitalOutputDevice(pin=ringer_relay_pin)
 volume_button = DigitalInputDevice(pin=volume_button_pin, pull_up=True, bounce_time=0.05)
-volume_button.when_activated = vol_button_pressed
 hook_switch = DigitalInputDevice(pin=hook_switch_pin, pull_up=True, bounce_time=0.05)
 
 # The coin switches need to be more sensitive because they only activate for a fraction of a second when a coin falls.

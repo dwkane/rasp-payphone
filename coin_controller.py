@@ -47,11 +47,3 @@ def coin_inserted(switch):
     elif switch is hardware.nickel_pin:
         coin_total += 5
     print(get_coin_total())
-
-
-def vol_button_pressed(switch):
-    time.sleep(0.01)
-    # if switch activation is a false positive due to interference when a relay activates
-    if bool(switch.value) is False:
-        return
-    print("volume")
